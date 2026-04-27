@@ -43,7 +43,7 @@ def get_lr(current_step, total_steps, lr):
 
 def init_distributed_mode():
     if int(os.environ.get("RANK", -1)) == -1:
-        return 0  # 非DDP模式
+        return 0  # 非DDP模式 (Distributed Data Parallelism)
 
     dist.init_process_group(backend="nccl")
     local_rank = int(os.environ["LOCAL_RANK"])
@@ -52,13 +52,13 @@ def init_distributed_mode():
 
 
 def setup_seed(seed: int):
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
+    random.seed(seed)                      # Python随机库
+    np.random.seed(seed)                   # NumPy随机数
+    torch.manual_seed(seed)                # PyTorch CPU随机数
+    torch.cuda.manual_seed(seed)           # CUDA GPU随机数（单GPU）
+    torch.cuda.manual_seed_all(seed)       # CUDA GPU随机数（多GPU）
+    torch.backends.cudnn.deterministic = True   # 使cuDNN算法确定性
+    torch.backends.cudnn.benchmark = False      # 禁用自动优化
 
 def lm_checkpoint(lm_config, weight='full_sft', model=None, optimizer=None, epoch=0, step=0, wandb=None, save_dir='../checkpoints', **kwargs):
     os.makedirs(save_dir, exist_ok=True)
